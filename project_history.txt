@@ -1,0 +1,47 @@
+    1  lsblk
+    2  sudo fdisk /dev/sdb
+    3  sudo mkdir -p /data/mephi-web
+    4  echo "LABEL=MEPHI_DATA /data/mephi-web ext4 defaults 0 2" | sudo tee -a /etc/fstab
+    5  sudo mount -a
+    6  df -h | grep MEPHI_DATA
+    7  lsblk
+    8  sudo mount -a
+    9  sudo mkfs.ext4 -L MEPHI_DATA /dev/sdb1
+   10  sudo nano /etc/fstab
+   11  sudo systemctl daemon-reload
+   12  sudo mount -a
+   13  lsblk -o NAME,FSTYPE,LABEL,MOUNTPOINT
+   14  df -h | grep mephi-web
+   15  sudo systemctl start nginx
+   16  sudo systemctl enable nginx
+   17  systemctl status nginx
+   18  sudo journalctl -u nginx --since "5 minutes ago" > /tmp/nginx_recent_logs.txt
+   19  cat /tmp/nginx_recent_logs.txt 
+   20  sudo groupadd mephi-devs
+   21  sudo useradd -m -G mephi-devs mephi-admin
+   22  echo "mephi-admin:P@ssw0rd2026" | sudo chpasswd
+   23  sudo visudo
+   24  sudo -l -U mephi-admin
+   25  sudo chown mephi-admin:mephi-devs /data/mephi-web
+   26  sudo chmod 2775 /data/mephi-web
+   27  ls -ld /data/mephi-web
+   28  sestatus
+   29  sudo semanage fcontext -a -t httpd_sys_content_t "data/mephi-web(/.*)?"
+   30  sudo restorecon -Rv /data/mephi-web
+   31  ls -Z /data/mephi-web
+   32  sudo semanage fcontext -a -t httpd_sys_content_t "/data/mephi-web(/.*)?"
+   33  sudo restorecon -Rv /data/mephi-web
+   34  ls -Z /data/mephi-web
+   35  sudo chmod u-s /usr/sbin/tcpdump 
+   36  sudo setcap cap_net_raw,cap_net_admin+ep /usr/sbin/tcpdump
+   37  getcap /usr/sbin/tcpdump 
+   38  sudo -u mephi-admin tcpdump --help
+   39  echo "root" | sudo tee /etc/security/denied_users
+   40  sudo chmod 644 /etc/security/denied_users
+   41  sudo sed -i '1i auth required pam_listfile.so item=user sense=deny file=/etc/security/denied_users onerr=fail' /etc/pam.d/sshd
+   42  sudo sed -i '1i auth required pam_listfile.so item=user sense=deny file=/etc/security/denied_users onerr=succeed' /etc/pam.d/login
+   43  sudo grep pam_listfile /etc/pam.d/sshd /etc/pam.d/login
+   44  sudo systemctl restart sshd
+   45  su - mephi-admin
+   46  ls
+   47  history > ~/project_history.txt
